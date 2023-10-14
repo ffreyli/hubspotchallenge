@@ -8,15 +8,14 @@ moment().format("YYYY-MM-DD");
 
     const partners = res.data.partners;
 
+    let countryMapToDateCounts = {};
     let dateCounts = {};
-    let highestCount = 0;
-    let earliestDate;
+  
 
     partners.forEach((partner) => {
         partner.availableDates.forEach((date) => {
             
             var day = moment(date, "YYYY-MM-DD").toISOString();
-            //let day = date;
             
             if (dateCounts[day] === undefined) {
                 dateCounts[day] = 1;
@@ -26,27 +25,34 @@ moment().format("YYYY-MM-DD");
         })
     })
 
-    let keys = Object.keys(dateCounts);
-
-    keys.forEach((key) => {
-        let countSum = dateCounts[key];
-        let dayTwoCount = dateCounts[moment(key).add(1, 'd').toISOString()];
-
-        if(dayTwoCount !== null) {
-            countSum = countSum + dayTwoCount;
-        }
-        if(countSum > highestCount) {
-            highestCount = countSum;
-            earliestDate = key;
-        } else if (countSum === highestCount) {
-            if(earliestDate) {
-                if(moment(key).isBefore(moment(earliestDate))) {
-                    earliestDate = key;
-                }
+    const getHighestCountForEarliestDateFromDateCounts = (dateCounts) => {
+        let highestCount = 0;
+        let earliestDate;
+        let keys = Object.keys(dateCounts);
+    
+        keys.forEach((key) => {
+            let countSum = dateCounts[key];
+            let dayTwoCount = dateCounts[moment(key).add(1, 'd').toISOString()];
+    
+            if(dayTwoCount !== null) {
+                countSum = countSum + dayTwoCount;
             }
-            
-        }
-    })
+            if(countSum > highestCount) {
+                highestCount = countSum;
+                earliestDate = key;
+            } else if (countSum === highestCount) {
+                if(earliestDate) {
+                    if(moment(key).isBefore(moment(earliestDate))) {
+                        earliestDate = key;
+                    }
+                }
+                
+            }
+        })
+        return {
+            highestCount, earliestDate
+        };
+    }
 
     console.log(partners);
     console.log(dateCounts);
